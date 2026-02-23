@@ -1,0 +1,285 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts} 
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{Finite-Sample Performance of Missing-Data Estimators for Binary Clinical Endpoints}
+\author{gpt-5.3-codex and OpenClaw\thanks{The authors thank gpt-5.2 thinking for helpful remarks and suggestions. Any remaining errors are our own.}}
+\date{\today}
+
+\begin{document}
+\maketitle
+\onehalfspacing
+
+\input{../results/study_counts.tex}
+
+\begin{abstract}
+Missing outcomes are a persistent threat to valid treatment-effect estimation in clinical studies. We conducted an extended, fully reproducible simulation study comparing complete-case analysis (CC), outcome-model g-computation (OM), inverse-probability weighting (IPW), and augmented inverse-probability weighting (AIPW) for a marginal treatment log-odds estimand. The design included \NumScenarios\ scenarios, \NumReps\ Monte Carlo replicates per scenario, \NumDatasets\ simulated datasets, and \NumMethodFits\ method-specific estimates, spanning MAR and MNAR-like stress-test mechanisms plus explicit nuisance-model misspecification patterns. Across settings, OM/AIPW were typically most efficient under MAR, IPW was more variance-sensitive, and all MAR-based methods degraded under strong MNAR-like violations. In null scenarios, matched-null rejection rates were near nominal under MAR but increased markedly in stronger MNAR stress tests, consistent with identification failure under violated assumptions. Results quantify both robustness gains and their limits under realistic finite-sample stressors.
+\end{abstract}
+
+\section{Introduction}
+Clinical datasets often include missing outcomes because of attrition, protocol deviations, or follow-up failure. Inference then depends critically on assumptions about the missingness mechanism and the analyst's model class \cite{rubin1976,little2019}. In applied medical work, complete-case analysis is still common, despite known risks of bias when outcome observation depends on prognosis-related variables \cite{sterne2009,seaman2013}. Multiple imputation and weighting-based methods can improve validity, but both depend on nuisance models that are at best partially testable from observed data \cite{white2011,carpenter2013}.
+
+The modern causal-inference view frames missing outcomes as a coarsening problem linked to treatment-effect estimation under incomplete follow-up. In that view, IPW targets representativeness via estimated observation probabilities, while doubly robust estimators blend outcome regression and weighting to retain consistency if either nuisance model is correctly specified \cite{robins1994,bang2005}. This theoretical robustness is attractive, but finite-sample behavior under realistic misspecification patterns remains a key operational question for medical researchers.
+
+A remaining applied gap is systematic finite-sample benchmarking under combinations of informative missingness, nuisance-model misspecification, and pragmatic sample sizes. This manuscript addresses that gap with an extended, fully reproducible simulation design.
+
+\section{Methods}
+\subsection{Target estimand}
+Let $X=(\text{Age},\text{Comorbidity},\text{Severity},\text{Biomarker})$. The target estimand is the marginal treatment log-odds contrast
+\[
+\theta = \mathrm{logit}\{\mathbb{E}(Y^{1})\} - \mathrm{logit}\{\mathbb{E}(Y^{0})\},
+\]
+where $Y^{a}$ is the potential binary outcome under treatment level $a\in\{0,1\}$, $\mathrm{expit}(u)=\{1+\exp(-u)\}^{-1}$, and $\mathrm{logit}(p)=\log\{p/(1-p)\}$. We focused on the marginal log-odds contrast because odds-ratio reporting remains common in clinical publications; all methods were therefore aligned to this same marginal estimand.
+
+\subsection{Data-generating process}
+For each simulated participant,
+\[
+\text{Age}\sim\mathcal{N}(60,11^2),\quad
+\text{Comorbidity}\sim\text{Poisson}(1.8),\quad
+\text{Severity}\sim\mathcal{N}(0,1),\quad
+\text{Biomarker}\sim\mathcal{N}(0,1).
+\]
+Treatment was randomized as $A\sim\mathrm{Bernoulli}(0.5)$. Let $\text{Age}_c=(\text{Age}-60)/10$. The outcome model was
+\[
+\begin{aligned}
+\Pr(Y=1\mid X,A)=\mathrm{expit}\Big(&-0.8 +\beta_{\text{trt}}A +0.18\,\text{Age}_c +0.22\,\text{Comorbidity} \\
+&+0.65\,\text{Severity} +0.20\,\text{Biomarker} +\beta_{\text{int}}\,A\cdot\text{Severity} \\
+&-0.12\,\text{Severity}^2\Big).
+\end{aligned}
+\]
+Non-null scenarios used $(\beta_{\text{trt}},\beta_{\text{int}})=(0.45,0.28)$. Null scenarios set both treatment terms to zero, $(\beta_{\text{trt}},\beta_{\text{int}})=(0,0)$, so the marginal treatment estimand is exactly $\theta=0$.
+
+\subsection{Missingness mechanisms}
+The outcome observation indicator $R$ followed
+\[
+\begin{aligned}
+\Pr(R=1\mid X,A,Y)=\mathrm{expit}\Big(&1.4 -0.10\,\text{Age}_c -0.10\,\text{Comorbidity} \\
+&-0.35\,\text{Severity} +0.05\,A -\gamma Y-\gamma_{AY}(A\cdot Y)\Big).
+\end{aligned}
+\]
+We considered (i) MAR $(\gamma,\gamma_{AY})=(0,0)$, (ii) moderate MNAR-like $(\gamma,\gamma_{AY})=(0.6,0.2)$, (iii) strong MNAR-like $(\gamma,\gamma_{AY})=(1.0,0.35)$, and two additional stronger MNAR stress tests $(1.0,0.0)$ and $(0.6,0.8)$ chosen to induce clearer treatment-differential selection. The MNAR-like settings are sensitivity stress tests: all estimators are fit with MAR-style nuisance models and are not expected to be fully consistent when $(\gamma,\gamma_{AY})\neq(0,0)$.
+
+\subsection{Nuisance-model specifications and misspecification settings}
+For OM and AIPW, the correctly specified fitted outcome model matched the DGP functional form in $X$ and included $A\cdot\text{Severity}$ and $\text{Severity}^2$. The misspecified outcome model omitted biomarker, the treatment--severity interaction, and the quadratic severity term.
+
+For IPW and AIPW, the correctly specified fitted missingness model used treatment, centered age, comorbidity, severity, and biomarker. The misspecified missingness model omitted severity and biomarker.
+
+In non-null scenarios we evaluated four nuisance-model conditions: correct, outcome-model misspecified, missingness-model misspecified, and both misspecified. Here ``correct'' means MAR-compatible nuisance models are correctly specified for the MAR mechanism; under MNAR stress mechanisms these nuisance models are intentionally misspecified by construction.
+
+\subsection{Estimators and inference}
+\paragraph{Complete-case (CC).}
+Among observed outcomes ($R=1$), estimate arm-specific observed risks
+\[
+\hat\psi^{CC}_a=\frac{\sum_i R_i\,\mathbf{1}(A_i=a)Y_i}{\sum_i R_i\,\mathbf{1}(A_i=a)},\quad a\in\{0,1\},
+\]
+and report
+\[
+\hat\theta_{CC}=\mathrm{logit}(\hat\psi^{CC}_1)-\mathrm{logit}(\hat\psi^{CC}_0).
+\]
+
+\paragraph{Outcome-model g-computation (OM).}
+Fit logistic regression for $Y$ on observed cases ($R=1$), obtain predictions $\hat\mu_i(a)=\hat P(Y=1\mid X_i,A=a)$, compute
+\[
+\hat\psi_a=\frac{1}{n}\sum_{i=1}^n \hat\mu_i(a),
+\qquad
+\hat\theta_{OM}=\mathrm{logit}(\hat\psi_1)-\mathrm{logit}(\hat\psi_0).
+\]
+
+\paragraph{Inverse-probability weighting (IPW).}
+Fit logistic regression for $R$ on baseline covariates and treatment to estimate $\hat p_i=\hat P(R_i=1\mid X_i,A_i)$. We used truncated probabilities $\hat p_i\in[0.02,0.98]$ and weights $w_i=1/\hat p_i$, then estimated weighted arm-specific risks using a normalized (Hájek) form
+\[
+\hat\psi^{IPW}_a=\frac{\sum_i R_i\,\mathbf{1}(A_i=a)w_iY_i}{\sum_i R_i\,\mathbf{1}(A_i=a)w_i},
+\qquad
+\hat\theta_{IPW}=\mathrm{logit}(\hat\psi^{IPW}_1)-\mathrm{logit}(\hat\psi^{IPW}_0).
+\]
+
+\paragraph{Augmented inverse-probability weighting (AIPW).}
+Using both nuisance models, with known randomization probability $\pi=0.5$,
+\[
+\begin{aligned}
+\hat\psi_1=\frac{1}{n}\sum_i\Bigg[\hat\mu_i(1)
++\frac{R_i\,\mathbf{1}(A_i=1)}{\hat p_i\,\pi}\{Y_i-\hat\mu_i(1)\}\Bigg],\\
+\hat\psi_0=\frac{1}{n}\sum_i\Bigg[\hat\mu_i(0)
++\frac{R_i\,\mathbf{1}(A_i=0)}{\hat p_i\,(1-\pi)}\{Y_i-\hat\mu_i(0)\}\Bigg],
+\end{aligned}
+\]
+\[
+\hat\theta_{AIPW}=\mathrm{logit}(\hat\psi_1)-\mathrm{logit}(\hat\psi_0).
+\]
+
+\paragraph{Standard errors, confidence intervals, and tests.}
+For each method we computed asymptotic standard errors from influence-function/M-estimation linearization (including nuisance-model estimation for OM, IPW, and AIPW), then formed Wald 95\% confidence intervals $\hat\theta\pm1.96\,\widehat{SE}$. For matched null scenarios we report the two-sided Wald rejection rate at $\alpha=0.05$; under MAR this corresponds to Type-I error, while under MNAR stress tests it is interpreted as rejection under violated identifying assumptions.
+
+\paragraph{Estimand alignment note.}
+All four methods were evaluated on the same marginal estimand $\theta$. Under non-null settings, conditional and marginal log-odds contrasts can differ because of non-collapsibility; therefore all methods were written and evaluated in marginal-risk form.
+
+\subsection{True-effect computation}
+Scenario-specific true values of $\theta$ were computed by large Monte Carlo integration from the full-data DGP (2,000,000 draws per treatment setting). Bias and RMSE were evaluated against these scenario-specific targets.
+
+\subsection{Extended simulation design and reproducibility}
+We evaluated sample sizes $n\in\{\SampleSizes\}$, five missingness mechanisms, four nuisance-model settings, and matched null scenarios for each design cell. Total simulation budget was \NumScenarios\ scenarios $\times$ \NumReps\ replicates $=\NumDatasets$ datasets, yielding \NumMethodFits\ method-specific estimates.
+
+To support reproducibility, each scenario used deterministic hash-based seeds from a global seed, simulations were run with Python's \texttt{multiprocessing} (platform-appropriate context), and all outputs (raw replicate results, summaries, tables, and figures) were generated by version-controlled scripts. Code and scripts to reproduce the paper are available at \url{https://github.com/project1explore/missing-data-estimator-simulation}. This run used Python 3.12.3 and Matplotlib 3.10.8 on Linux.
+
+\subsection{Performance metrics}
+For each scenario-method pair we computed bias, RMSE, empirical 95\% CI coverage, and matched-null rejection rates from corresponding null scenarios. Here, a \emph{design cell} means a unique combination of sample size, missingness mechanism, and nuisance-model condition. A \emph{matched null} scenario is the corresponding cell with the same design settings but with treatment effects set to zero $(\beta_{\text{trt}},\beta_{\text{int}})=(0,0)$, used to estimate rejection rates (interpretable as Type-I error under MAR). We additionally report Monte Carlo standard errors (MCSEs) for these metrics in the machine-readable summary output.
+
+\section{Results}
+\subsection{Primary performance (N=700, baseline-model specification setting)}
+Under MAR, OM and AIPW had the smallest RMSE (both approximately 0.16), CC was slightly less efficient, and IPW showed larger variance-driven RMSE. Under MNAR-like mechanisms, all MAR-based methods showed bias, with larger departures in the stronger MNAR stress tests (especially when treatment-differential outcome-dependent missingness was stronger). For example, in the $N=700$ baseline-model specification scenarios, CC bias was about $-0.063$ (moderate MNAR), $-0.175$ (strong MNAR), and $-0.387$ (strong $A\times Y$ MNAR), while the Y-only MNAR stress test showed much smaller CC bias (about $-0.010$). CC was therefore not uniformly robust under MNAR-like settings.
+
+Coverage was near nominal under MAR but deteriorated in stronger MNAR-like settings, especially the strong $A\times Y$ selection mechanism. Matched-null rejection rates were close to 0.05 under MAR, but increased substantially under MNAR stress tests; these values should be interpreted as rejection under violated identifying assumptions rather than classical Type-I error control. With 250 replicates in this run, MCSEs are not negligible (typically around 0.01--0.02 for coverage/rejection rate), so small deviations should still be interpreted with Monte Carlo uncertainty in mind. To make this explicit, primary plots include 95\% Monte Carlo uncertainty bars computed as $\pm 1.96\times\mathrm{MCSE}$ from the summary output.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Primary performance for $N=700$ in the baseline-model specification setting. Columns report: Bias ($\hat\theta-\theta$), RMSE, empirical 95\% CI Coverage, matched-null rejection rate at $\alpha=0.05$, Obs. rate (mean $R=1$ proportion), and Reps (Monte Carlo replicates per scenario). Rejection-rate values use matched null scenarios with the same design cell.}
+\label{tab:primary}
+\resizebox{\textwidth}{!}{\input{../results/table_correct.tex}}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{../results/fig_bias_python.pdf}
+\caption{Bias by missingness mechanism ($N=700$, baseline-model specification setting). Error bars show 95\% Monte Carlo uncertainty ($\pm1.96\times\mathrm{MCSE}$). Dashed line marks zero bias.}
+\label{fig:bias}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{../results/fig_rmse_python.pdf}
+\caption{RMSE by missingness mechanism ($N=700$, baseline-model specification setting). Error bars show 95\% Monte Carlo uncertainty ($\pm1.96\times\mathrm{MCSE}$).}
+\label{fig:rmse}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{../results/fig_coverage_python.pdf}
+\caption{Coverage by missingness mechanism ($N=700$, baseline-model specification setting). Error bars show 95\% Monte Carlo uncertainty ($\pm1.96\times\mathrm{MCSE}$). Dashed line marks nominal 0.95 coverage.}
+\label{fig:coverage}
+\end{figure}
+
+\subsection{Misspecification stress tests and sample-size sensitivity}
+Stress tests showed that performance depended on which nuisance model failed. Under MAR, misspecifying the missingness model most strongly affected IPW precision, whereas OM and AIPW remained comparatively stable. Under MNAR-like mechanisms, no single method uniformly dominated across all misspecification settings; however, when both nuisance models were misspecified, IPW most often showed the largest RMSE, and the strongest $A\times Y$ MNAR setting produced marked coverage deterioration across methods. In the MAR outcome-misspecification setting, OM bias remained modest in this DGP because the omitted terms had limited impact on the marginal risk contrast over the sampled covariate range. The nuisance-model labels in Table~\ref{tab:misspec} are scenario-level settings; CC is shown in each block as a reference method even though CC does not fit nuisance models.
+
+Sample-size effects were as expected: RMSEs were uniformly larger at $N=350$ than at $N=700$, while broad relative method patterns were preserved.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Misspecification stress tests at $N=700$. Nuisance-model setting is scenario-level and indicates which nuisance model was misspecified; CC rows are included as a reference method. Metric columns are Bias, RMSE, empirical 95\% CI Coverage, matched-null rejection rate, Obs. rate (mean observed-outcome proportion), and Reps. Rejection-rate values are from matched null scenarios.}
+\label{tab:misspec}
+\resizebox{\textwidth}{!}{\input{../results/table_misspec.tex}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Sample-size sensitivity in the baseline-model specification setting. Columns are: N (sample size), Bias, RMSE, empirical 95\% CI Coverage, matched-null rejection rate, Obs. rate (mean observed-outcome proportion), and Reps.}
+\label{tab:samplesize}
+\resizebox{\textwidth}{!}{\input{../results/table_samplesize.tex}}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{../results/fig_samplesize_python.pdf}
+\caption{Sample-size sensitivity under strong MNAR-like missingness.}
+\label{fig:samplesize}
+\end{figure}
+
+\paragraph{Weight diagnostics.}
+To contextualize IPW behavior, Table~\ref{tab:weights} reports missingness-probability and weight summaries for the primary design cells. Effective sample size decreased as missingness became more outcome-informative, consistent with increased weighting variability.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Weight diagnostics for $N=700$ in the baseline-model specification setting (non-null scenarios). Columns are replicate-averaged summaries: min($\hat p$), med($\hat p$), and max($\hat p$) for fitted observation probabilities among observed cases; max($w$) for inverse-probability weights $w=1/\hat p$; ESS (effective sample size, $(\sum w)^2/\sum w^2$ among observed cases); and Trunc. (\%), the percentage of records where $\hat p$ was truncated to the analysis bounds. Because columns are averaged separately across replicates, max($w$) is not expected to equal exactly $1/\text{min}(\hat p)$.}
+\label{tab:weights}
+\resizebox{0.9\textwidth}{!}{\input{../results/table_weights.tex}}
+\end{table}
+
+\subsection{Null scenarios}
+Null-scenario results are summarized in Table~\ref{tab:null}. Under MAR-like settings, matched-null rejection rates were near nominal 0.05. Under stronger MNAR-like mechanisms (especially strong $A\times Y$ selection), rejection rates were much higher, reflecting bias under violated identifying assumptions rather than a small-sample calibration issue. Given MCSEs of about 0.008--0.032 for these rejection rates, the largest departures are materially meaningful.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Null-scenario performance in the baseline-model specification setting. Columns report: Bias (relative to true $\theta=0$), RMSE, empirical 95\% CI Coverage, matched-null rejection rate at $\alpha=0.05$, Obs. rate (mean observed-outcome proportion), and Reps.}
+\label{tab:null}
+\resizebox{\textwidth}{!}{\input{../results/table_null.tex}}
+\end{table}
+
+\section{Discussion}
+Several practical points emerge. First, estimator ranking depended on mechanism and model quality rather than following a universal hierarchy. Under MAR, OM/AIPW were typically most efficient and IPW paid a variance penalty; under stronger MNAR-like stress, all MAR-based approaches showed bias increases. With the added MNAR stress tests, CC bias was clearly non-negligible in treatment-differential MNAR settings (largest in the strong $A\times Y$ selection scenario), while MNAR settings without strong treatment-differential selection could still show smaller CC bias. This underscores that finite-sample behavior is strongly mechanism-dependent and that near-zero CC bias in one MNAR design should not be over-generalized.
+
+Second, nuisance-model failure mode mattered. Misspecifying the missingness model disproportionately affected IPW precision, while AIPW usually stayed close to OM when at least one nuisance model remained approximately correct. When both nuisance models were misspecified, performance gaps narrowed and no method was uniformly superior. This is consistent with the intended interpretation of doubly robust methods: protection against one nuisance-model failure, not arbitrary misspecification.
+
+Third, inferential calibration should be reported jointly with point-estimation metrics. After incorporating nuisance-estimation uncertainty in OM/IPW/AIPW standard errors, MAR null-scenario rejection rates were close to nominal and improved relative to our earlier draft. In contrast, strong MNAR stress-test settings still showed substantially elevated rejection rates, reflecting assumption violation rather than residual standard-error calibration noise.
+
+From an applied perspective, these findings support a workflow that (i) pre-specifies the estimand and primary estimator, (ii) inspects weight diagnostics and effective sample size, and (iii) reports structured MNAR-oriented sensitivity analyses alongside MAR-based primary analyses \cite{sterne2009,carpenter2013}.
+
+\section{Limitations}
+This is a simulation study with one broad DGP family and a binary endpoint. We did not evaluate Bayesian MNAR models, reference-based imputation, or machine-learning nuisance estimators with cross-fitting. Standard errors were based on asymptotic linearization, and although this was adequate in our scenarios, bootstrap-based comparisons could be informative in future work.
+
+\section{Conclusion}
+For trial-like binary outcomes with missingness, no single estimator was uniformly best across all stress conditions. OM and AIPW were typically most efficient under MAR-like settings, IPW was more variance-sensitive, and all MAR-based methods degraded under strong MNAR-like violations. Robust applied analysis should therefore combine principled primary estimation with explicit sensitivity analysis and transparent diagnostic reporting.
+
+\begin{thebibliography}{99}
+\bibitem{rubin1976}
+Rubin DB.
+Inference and missing data.
+\textit{Biometrika}. 1976;63(3):581--592.
+DOI: \href{https://doi.org/10.1093/biomet/63.3.581}{10.1093/biomet/63.3.581}
+
+\bibitem{little2019}
+Little RJA, Rubin DB.
+\textit{Statistical Analysis with Missing Data}. 3rd ed.
+Hoboken, NJ: Wiley; 2019.
+
+\bibitem{sterne2009}
+Sterne JAC, White IR, Carlin JB, et al.
+Multiple imputation for missing data in epidemiological and clinical research: potential and pitfalls.
+\textit{BMJ}. 2009;338:b2393.
+DOI: \href{https://doi.org/10.1136/bmj.b2393}{10.1136/bmj.b2393}
+
+\bibitem{white2011}
+White IR, Royston P, Wood AM.
+Multiple imputation using chained equations: Issues and guidance for practice.
+\textit{Stat Med}. 2011;30(4):377--399.
+DOI: \href{https://doi.org/10.1002/sim.4067}{10.1002/sim.4067}
+
+\bibitem{seaman2013}
+Seaman SR, White IR.
+Review of inverse probability weighting for dealing with missing data.
+\textit{Stat Methods Med Res}. 2013;22(3):278--295.
+DOI: \href{https://doi.org/10.1177/0962280210395740}{10.1177/0962280210395740}
+
+\bibitem{carpenter2013}
+Carpenter JR, Kenward MG.
+\textit{Multiple Imputation and its Application}.
+Chichester, UK: Wiley; 2013.
+
+\bibitem{robins1994}
+Robins JM, Rotnitzky A, Zhao LP.
+Estimation of regression coefficients when some regressors are not always observed.
+\textit{J Am Stat Assoc}. 1994;89(427):846--866.
+DOI: \href{https://doi.org/10.1080/01621459.1994.10476818}{10.1080/01621459.1994.10476818}
+
+\bibitem{bang2005}
+Bang H, Robins JM.
+Doubly Robust Estimation in Missing Data and Causal Inference Models.
+\textit{Biometrics}. 2005;61(4):962--973.
+DOI: \href{https://doi.org/10.1111/j.1541-0420.2005.00377.x}{10.1111/j.1541-0420.2005.00377.x}
+\end{thebibliography}
+
+\end{document}

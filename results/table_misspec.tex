@@ -1,0 +1,66 @@
+\begin{tabular}{llllrrrrr}
+\hline
+Nuisance-model setting & Mechanism & Method & Bias & RMSE & Coverage & Type I (matched null) & Obs. rate & Reps \\\\
+\hline
+Outcome model misspecified & MAR & CC & 0.001 & 0.181 & 0.956 & 0.052 & 0.769 & 250 \\
+Outcome model misspecified & MAR & OM & -0.004 & 0.169 & 0.948 & 0.060 & 0.769 & 250 \\
+Outcome model misspecified & MAR & IPW & 0.023 & 0.234 & 0.940 & 0.060 & 0.769 & 250 \\
+Outcome model misspecified & MAR & AIPW & 0.011 & 0.170 & 0.948 & 0.056 & 0.769 & 250 \\
+Missingness model misspecified & MAR & CC & -0.001 & 0.179 & 0.936 & 0.060 & 0.769 & 250 \\
+Missingness model misspecified & MAR & OM & 0.008 & 0.165 & 0.944 & 0.052 & 0.769 & 250 \\
+Missingness model misspecified & MAR & IPW & 0.001 & 0.213 & 0.948 & 0.064 & 0.769 & 250 \\
+Missingness model misspecified & MAR & AIPW & 0.008 & 0.165 & 0.940 & 0.056 & 0.769 & 250 \\
+Both misspecified & MAR & CC & -0.004 & 0.185 & 0.936 & 0.036 & 0.769 & 250 \\
+Both misspecified & MAR & OM & -0.004 & 0.168 & 0.936 & 0.048 & 0.769 & 250 \\
+Both misspecified & MAR & IPW & -0.013 & 0.228 & 0.928 & 0.032 & 0.769 & 250 \\
+Both misspecified & MAR & AIPW & -0.006 & 0.168 & 0.940 & 0.040 & 0.769 & 250 \\
+Outcome model misspecified & MNAR-like (moderate) & CC & -0.078 & 0.211 & 0.888 & 0.060 & 0.701 & 250 \\
+Outcome model misspecified & MNAR-like (moderate) & OM & -0.061 & 0.193 & 0.924 & 0.064 & 0.701 & 250 \\
+Outcome model misspecified & MNAR-like (moderate) & IPW & -0.053 & 0.247 & 0.924 & 0.056 & 0.701 & 250 \\
+Outcome model misspecified & MNAR-like (moderate) & AIPW & -0.033 & 0.191 & 0.932 & 0.076 & 0.701 & 250 \\
+Missingness model misspecified & MNAR-like (moderate) & CC & -0.090 & 0.202 & 0.920 & 0.092 & 0.704 & 250 \\
+Missingness model misspecified & MNAR-like (moderate) & OM & -0.047 & 0.175 & 0.948 & 0.080 & 0.704 & 250 \\
+Missingness model misspecified & MNAR-like (moderate) & IPW & -0.086 & 0.235 & 0.944 & 0.064 & 0.704 & 250 \\
+Missingness model misspecified & MNAR-like (moderate) & AIPW & -0.047 & 0.175 & 0.948 & 0.084 & 0.704 & 250 \\
+Both misspecified & MNAR-like (moderate) & CC & -0.106 & 0.207 & 0.924 & 0.072 & 0.703 & 250 \\
+Both misspecified & MNAR-like (moderate) & OM & -0.089 & 0.189 & 0.924 & 0.072 & 0.703 & 250 \\
+Both misspecified & MNAR-like (moderate) & IPW & -0.098 & 0.232 & 0.956 & 0.052 & 0.703 & 250 \\
+Both misspecified & MNAR-like (moderate) & AIPW & -0.090 & 0.191 & 0.916 & 0.072 & 0.703 & 250 \\
+Outcome model misspecified & MNAR-like (strong) & CC & -0.181 & 0.272 & 0.860 & 0.132 & 0.652 & 250 \\
+Outcome model misspecified & MNAR-like (strong) & OM & -0.138 & 0.234 & 0.900 & 0.128 & 0.652 & 250 \\
+Outcome model misspecified & MNAR-like (strong) & IPW & -0.142 & 0.279 & 0.904 & 0.100 & 0.652 & 250 \\
+Outcome model misspecified & MNAR-like (strong) & AIPW & -0.102 & 0.218 & 0.944 & 0.124 & 0.652 & 250 \\
+Missingness model misspecified & MNAR-like (strong) & CC & -0.185 & 0.277 & 0.856 & 0.132 & 0.651 & 250 \\
+Missingness model misspecified & MNAR-like (strong) & OM & -0.117 & 0.230 & 0.916 & 0.116 & 0.651 & 250 \\
+Missingness model misspecified & MNAR-like (strong) & IPW & -0.185 & 0.297 & 0.872 & 0.144 & 0.651 & 250 \\
+Missingness model misspecified & MNAR-like (strong) & AIPW & -0.119 & 0.230 & 0.920 & 0.112 & 0.651 & 250 \\
+Both misspecified & MNAR-like (strong) & CC & -0.203 & 0.277 & 0.840 & 0.116 & 0.651 & 250 \\
+Both misspecified & MNAR-like (strong) & OM & -0.165 & 0.246 & 0.888 & 0.120 & 0.651 & 250 \\
+Both misspecified & MNAR-like (strong) & IPW & -0.195 & 0.300 & 0.868 & 0.112 & 0.651 & 250 \\
+Both misspecified & MNAR-like (strong) & AIPW & -0.168 & 0.246 & 0.876 & 0.124 & 0.651 & 250 \\
+Outcome model misspecified & MNAR-like (Y-only) & CC & 0.007 & 0.194 & 0.944 & 0.068 & 0.673 & 250 \\
+Outcome model misspecified & MNAR-like (Y-only) & OM & 0.018 & 0.180 & 0.948 & 0.056 & 0.673 & 250 \\
+Outcome model misspecified & MNAR-like (Y-only) & IPW & 0.044 & 0.234 & 0.936 & 0.052 & 0.673 & 250 \\
+Outcome model misspecified & MNAR-like (Y-only) & AIPW & 0.049 & 0.191 & 0.944 & 0.052 & 0.673 & 250 \\
+Missingness model misspecified & MNAR-like (Y-only) & CC & 0.006 & 0.196 & 0.952 & 0.068 & 0.672 & 250 \\
+Missingness model misspecified & MNAR-like (Y-only) & OM & 0.048 & 0.193 & 0.932 & 0.048 & 0.672 & 250 \\
+Missingness model misspecified & MNAR-like (Y-only) & IPW & -0.005 & 0.222 & 0.964 & 0.048 & 0.672 & 250 \\
+Missingness model misspecified & MNAR-like (Y-only) & AIPW & 0.049 & 0.194 & 0.924 & 0.052 & 0.672 & 250 \\
+Both misspecified & MNAR-like (Y-only) & CC & -0.005 & 0.209 & 0.944 & 0.016 & 0.672 & 250 \\
+Both misspecified & MNAR-like (Y-only) & OM & 0.009 & 0.196 & 0.936 & 0.028 & 0.672 & 250 \\
+Both misspecified & MNAR-like (Y-only) & IPW & -0.018 & 0.239 & 0.936 & 0.028 & 0.672 & 250 \\
+Both misspecified & MNAR-like (Y-only) & AIPW & 0.008 & 0.196 & 0.932 & 0.024 & 0.672 & 250 \\
+Outcome model misspecified & MNAR-like (strong A×Y) & CC & -0.388 & 0.441 & 0.476 & 0.444 & 0.666 & 250 \\
+Outcome model misspecified & MNAR-like (strong A×Y) & OM & -0.325 & 0.379 & 0.560 & 0.380 & 0.666 & 250 \\
+Outcome model misspecified & MNAR-like (strong A×Y) & IPW & -0.338 & 0.418 & 0.704 & 0.340 & 0.666 & 250 \\
+Outcome model misspecified & MNAR-like (strong A×Y) & AIPW & -0.299 & 0.359 & 0.652 & 0.388 & 0.666 & 250 \\
+Missingness model misspecified & MNAR-like (strong A×Y) & CC & -0.359 & 0.409 & 0.520 & 0.428 & 0.666 & 250 \\
+Missingness model misspecified & MNAR-like (strong A×Y) & OM & -0.265 & 0.325 & 0.692 & 0.388 & 0.666 & 250 \\
+Missingness model misspecified & MNAR-like (strong A×Y) & IPW & -0.357 & 0.421 & 0.616 & 0.296 & 0.666 & 250 \\
+Missingness model misspecified & MNAR-like (strong A×Y) & AIPW & -0.270 & 0.329 & 0.692 & 0.400 & 0.666 & 250 \\
+Both misspecified & MNAR-like (strong A×Y) & CC & -0.371 & 0.417 & 0.540 & 0.456 & 0.664 & 250 \\
+Both misspecified & MNAR-like (strong A×Y) & OM & -0.304 & 0.356 & 0.620 & 0.372 & 0.664 & 250 \\
+Both misspecified & MNAR-like (strong A×Y) & IPW & -0.373 & 0.431 & 0.628 & 0.308 & 0.664 & 250 \\
+Both misspecified & MNAR-like (strong A×Y) & AIPW & -0.307 & 0.359 & 0.608 & 0.356 & 0.664 & 250 \\
+\hline
+\end{tabular}
